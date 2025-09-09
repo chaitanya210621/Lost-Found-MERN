@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', true); 
+
 import express from 'express'
 import mongoose from 'mongoose'
 import morgan from 'morgan'
