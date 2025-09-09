@@ -1,21 +1,25 @@
 import React from "react";
-import { Stack } from '@mui/material'
-import Navbar from "./Components/Navbar.js";
-import Footer from "./Components/footer.js";
+import { Stack } from '@mui/material';
+import { Outlet } from "react-router-dom"; // <-- important
+import Navbar from "./Components/Navbar";
+import Footer from "./Components/Footer";
 
-function Layout(props) {
+function Layout() {
   return (
-            <Stack
-            spacing="0"
-            width="100%"
-            alignItems="center"
-            height="100vh"
-            justifyContent="space-between"
-        >
+    <Stack
+      spacing={0}
+      width="100%"
+      alignItems="center"
+      minHeight="100vh"
+      justifyContent="space-between"
+    >
       <Navbar />
-      {props.children}
-      <Footer/>
-        </Stack>
+      
+      {/* This replaces props.children */}
+      <Outlet />
+
+      <Footer />
+    </Stack>
   );
 }
 
