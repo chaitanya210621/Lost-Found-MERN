@@ -1,50 +1,50 @@
+require('dotenv').config();
+const express = require('express');
 const mongoose = require('mongoose');
-mongoose.set('strictQuery', true); 
+const path = require('path');
+const cors = require('cors');
 
-import express from 'express'
-import mongoose from 'mongoose'
-import morgan from 'morgan'
-import bodyParser from 'body-parser'
-import cookieParser from 'cookie-parser'
-import cors from 'cors'
-import dotenv from 'dotenv'
+const app = express();
+app.use(cors());
+app.use(express.json());
 
+// -----------------------------
+// Mongoose Setup
+// -----------------------------
+mongoose.set('strictQuery', true); // Suppress strictQuery warning
 
-import userRoutes from './routes/userRoutes.js'
-import ItemRoutes from './routes/ItemRoutes.js'
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/lostfound";
 
-
-const app = express()
-dotenv.config();
-app.use(express.json())
-app.use(cors())
-app.use(morgan('dev'))
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-app.use(cookieParser())
-
-app.use((_req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
-    res.header('Access-Control-Allow-Credentials', 'true')
-    res.header(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept'
-    )
-    res.header(
-        'Access-Control-Allow-Methods',
-        'GET, POST, OPTIONS, PUT, DELETE'
-    )
-    next()
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 })
+.then(() => console.log("✅ MongoDB connected successfully"))
+.catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1); // Stop server if DB connection fails
+});
 
+// -----------------------------
+// Routes (Import your routes here)
+// -----------------------------
+const userRoutes = require('./routes/userRoutes'); // adjust path if needed
+const itemRoutes = require('./routes/itemRoutes'); // example
 
-app.use('/users', userRoutes)
+app.use('/api/users', userRoutes);
+app.use('/api/items', itemRoutes);
 
-app.use('/Items', ItemRoutes)
+// -----------------------------
+// Serve React Build (Production)
+// -----------------------------
+app.use(express.static(path.join(__dirname, '../client/build')));
 
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+});
 
-const port = process.env.PORT || 4000;
-const db = process.env.DB;
-
-mongoose.connect(db,{ useNewUrlParser: true, useUnifiedTopology: true }).then(() => app.listen(port,() => console.log('Connection done and running on PORT :'+ port))).catch((err) => console.log(err.message));
-
+// -----------------------------
+// Start Server
+// -----------------------------
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
